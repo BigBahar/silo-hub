@@ -1,19 +1,31 @@
 name: Xcode - Build
 
 on: 
-  push:
-  pull_request:
   workflow_dispatch:
     inputs: 
       release__nightly:
         description: Create a nightly release
         type: boolean
         required: false
+      runner:
+        description: Runner image (xcode-27 is arm64 and often has no free runner)
+        type: choice
+        default: macos-26
+        options:
+          - macos-26
+          - xcode-27
+      xcode:
+        description: Xcode version
+        type: choice
+        default: '26.6'
+        options:
+          - '26.6'
+          - '27.2'
 
 jobs:
   build:
     name: Build using xcodebuild command
-    runs-on: xcode-27
+    runs-on: ${{ inputs.runner || 'macos-26' }}
     env:
       scheme: LiveContainer
       archive_path: archive
@@ -25,7 +37,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '27.2'
+          xcode-version: ${{ inputs.xcode || '26.6' }}
       - name: Checkout
         uses: actions/checkout@v6
         with:
